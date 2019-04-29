@@ -225,7 +225,6 @@ writeRaster(burned_dMIRBI_resc, filename="10_Burned area mask (dMIRBI)",format =
 
 # burn severity classes (based on dNBR)
 burned_dNBR_cl <- reclassify(dNBR, c(-Inf,0.27,NA, 0.27,0.44,1, 0.44,0.66,2, 0.66,Inf,3))
-plot(burned_dNBR_cl,col = c("yellow","red","purple"), main = 'Burn severity classes (dNBR)')
 writeRaster(burned_dNBR_cl, filename = "11_Burn Severity (dNBR)", format = "GTiff", overwrite = T)
 
 # burn severity classes (based on dMIRBI)
