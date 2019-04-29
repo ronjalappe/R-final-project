@@ -47,7 +47,8 @@ loadandinstall("lattice")
 ##################################### 1) Data import and conversion ##################################### 
 
 
-# set working directory to the where the images are stored
+# set working directory to the device, where the datasets are saved
+# output will be saved here as well 
 setwd("/Volumes/FRITZILEIN/R-project")
 
 # relative file-paths for the pre- and post-fire scenes and AOI shapefile 
