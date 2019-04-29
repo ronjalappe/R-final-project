@@ -36,16 +36,19 @@
 
 # load and install packages 
 loadandinstall <- function(mypkg) {if (!is.element(mypkg, installed.packages()[,1])){install.packages(mypkg)}; library(mypkg, character.only=TRUE)  }
+loadandinstall("sp")
 loadandinstall("raster")
 loadandinstall("RStoolbox")
+loadandinstall("rgdal")
 loadandinstall("gdalUtils")
 loadandinstall("ggplot2")
+loadandinstall("lattice")
 
 ##################################### 1) Data import and conversion ##################################### 
 
 
 # set working directory to the where the images are stored
-setwd("/Users/Ronjamac/Documents/Studium_Geographie/Master_EAGLE/MB1_Digital_image_analysis_GIS/Moorland_Meppen/")
+setwd("/Volumes/FRITZILEIN/R-project")
 
 # relative file-paths for the pre- and post-fire scenes and AOI shapefile 
 postfire_img_path <- "./Data/S2B_MSIL2A_20181010T104019_N0206_R008_T31UGU_20181010T161145.SAFE/GRANULE/L2A_T31UGU_A008328_20181010T104018/IMG_DATA/R20m"
@@ -113,13 +116,13 @@ ggRGB(postfire_crop_resc, r="B12",g="B11",b="B8A", stretch = "lin")+
   ggtitle("FCC post-fire")+
   labs(x="", y="")+
   theme(axis.text.y = element_text(angle = 90))
-ggsave("FCC_postfire.png")
+ggsave("01_FCC_postfire.png")
 
 ggRGB(prefire_crop_resc, r="B12",g="B11",b="B8A", stretch = "lin")+
   ggtitle("FCC pre-fire")+
   labs(x="", y="")+
   theme(axis.text.y = element_text(angle = 90))
-ggsave("FCC_prefire.png")
+ggsave("02_FCC_prefire.png")
 
 
 ##################################### 3) Calculate burn indices ##################################### 
@@ -144,7 +147,7 @@ NBR1 <- ggR(NBR_postfire, geom_raster = T)+
   labs(x="", y="")+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
-ggsave("NBR_postfire.png",NBR1)
+ggsave("03_NBR_postfire.png",NBR1)
 
 NBR2 <- ggR(NBR_prefire, geom_raster = T)+
   scale_fill_gradient2(low="#67000d", mid="#ef3b2c",high = "#fff5f0", name="NBR")+
@@ -152,7 +155,7 @@ NBR2 <- ggR(NBR_prefire, geom_raster = T)+
   labs(x="", y="")+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
-ggsave("NBR_prefire.png",NBR2)
+ggsave("04_NBR_prefire.png",NBR2)
 
 NBR3 <- ggR(dNBR, geom_raster = T)+
   scale_fill_gradient2(low="#fff5f0", mid="#ef3b2c",high ="#67000d", name="NBR")+
@@ -160,7 +163,7 @@ NBR3 <- ggR(dNBR, geom_raster = T)+
   labs(x="", y="")+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
-ggsave("dNBR.png",NBR3)
+ggsave("05_dNBR.png",NBR3)
 
 # Function to calculate the Mid-Infrared Burn Index
 mirbi <- function(img,k,i){
@@ -171,7 +174,6 @@ mirbi <- function(img,k,i){
 }
 
 # calculate MIRBI
-source("./R-final-project/MIRBI.R")
 MIRBI_postfire <- mirbi(postfire_crop_resc,"B11", "B12")
 MIRBI_prefire <- mirbi(prefire_crop_resc,"B11", "B12")
 dMIRBI <- MIRBI_postfire - MIRBI_prefire
@@ -184,7 +186,7 @@ MIRBI1 <- ggR(MIRBI_postfire, geom_raster = T)+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
 MIRBI1
-ggsave("MIRBI_postfire.png",MIRBI1)
+ggsave("06_MIRBI_postfire.png",MIRBI1)
 
 MIRBI2 <- ggR(MIRBI_prefire, geom_raster = T)+
   scale_fill_gradient2(low="#fff5f0", mid="#ef3b2c",high = "#67000d", midpoint=1.5,name="MIRBI")+  ggtitle("MIRBI pre-fire")+
@@ -192,7 +194,7 @@ MIRBI2 <- ggR(MIRBI_prefire, geom_raster = T)+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
 MIRBI2
-ggsave("MIRBI_prefire.png",MIRBI2)
+ggsave("07_MIRBI_prefire.png",MIRBI2)
 
 MIRBI3 <- ggR(dMIRBI, geom_raster = T)+
   scale_fill_gradient2(low="#fff5f0", mid="#ef3b2c",high ="#67000d", midpoint=0.5,name="MIRBI")+
@@ -201,7 +203,7 @@ MIRBI3 <- ggR(dMIRBI, geom_raster = T)+
   theme(axis.text.x = element_text(angle = 45, size = 8))+
   theme(axis.text.y = element_text(angle = 90, size = 8))
 MIRBI3
-ggsave("dMIRBI.png",MIRBI3)
+ggsave("08_dMIRBI.png",MIRBI3)
 
 
 ################################# 4) Create binary burned area mask ################################# 
@@ -209,33 +211,36 @@ ggsave("dMIRBI.png",MIRBI3)
 
 # from dNBR, threshold: 0.44 (moderate-high burn severity (according to USGS))
 burned_dNBR <- reclassify(dNBR,cbind(-Inf,0.44,NA))
-plot(burned_dNBR,col= "red",main="Burned area (dNBR)",legend)
+plot(burned_dNBR,col= "red",main="Burned area (dNBR)")
+writeRaster(burned_dNBR, filename="09_Burned area mask (dNBR)",format = "GTiff", overwrite = T)
 
 # from dMIRBI, threshold: 1 (according to Lu et al. 2016)
 burned_dMIRBI <- reclassify(dMIRBI,cbind(-Inf,1,NA))
 burned_dMIRBI_resc <- burned_dMIRBI - 0.8 # to make both scales comparable
 plot(burned_dMIRBI_resc,col= "red",main="Burned area (dMIRBI)")
-
+writeRaster(burned_dMIRBI_resc, filename="10_Burned area mask (dMIRBI)",format = "GTiff", overwrite = T)
 
 ################################# 5) Create burn severity classes ################################# 
 
 
 # burn severity classes (based on dNBR)
-burned_dNBR_cl <- reclassify(dNBR, c(-Inf,0.27,0, 0.27,0.44,1, 0.44,0.66,2, 0.66,Inf,3))
-writeRaster(burned_dNBR_cl, filename = "Burn Severity (dNBR)", format = "GTiff", overwrite = T)
+burned_dNBR_cl <- reclassify(dNBR, c(-Inf,0.27,NA, 0.27,0.44,1, 0.44,0.66,2, 0.66,Inf,3))
+plot(burned_dNBR_cl,col = c("yellow","red","purple"), main = 'Burn severity classes (dNBR)')
+writeRaster(burned_dNBR_cl, filename = "11_Burn Severity (dNBR)", format = "GTiff", overwrite = T)
 
 # burn severity classes (based on dMIRBI)
-burned_dMIRBI_cl <- reclassify(dMIRBI, c(-Inf,1,0, 1,1.17,1, 1.17,1.4,2, 1.4,Inf,3))
-writeRaster(burned_dMIRBI_cl, filename = "Burn Severity (dMIRBI)", format = "GTiff", overwrite = T)
+burned_dMIRBI_cl <- reclassify(dMIRBI, c(-Inf,1,NA, 1,1.17,1, 1.17,1.4,2, 1.4,Inf,3))
+writeRaster(burned_dMIRBI_cl, filename = "12_Burn Severity (dMIRBI)", format = "GTiff", overwrite = T)
 
 # plots (not as output, but to get an overview of the results)
   # define breaks and colorkey
-miat <- c(0,1,2,3)
+miat <- c(1,2,3,4)
 myColorkey <- list(at = miat,labels = list(labels = c("Low-Moderate", "Moderate-High","High"), at = miat+0.5))
   # plot burn severity classes (dNBR)
 spplot(burned_dNBR_cl, maxpixels=1000000, main='Burn severity classes (dNBR)',colorkey= myColorkey)
-  # plot burn severity classes (dMIRBI)
-spplot(burned_dMIRBI_cl, maxpixels=1000000, main='Burn severity classes (dNBR)',colorkey= myColorkey)
+
+  # plot burn severity classes (dMIRBI)B
+spplot(burned_dMIRBI_cl, maxpixels=1000000, main='Burn severity classes (dMIRBI)',colorkey= myColorkey)
 
 
 ################################# 6) Quantification of burned area ################################# 
